@@ -34,22 +34,32 @@ var uiController = (function() {
 
 var appController = (function(budgetCtrl, uiCtrl) {
 
-	var DOMstrings = uiCtrl.getDOMstrings();
+	var setupEventListeners = (function() {
+		var DOMstrings = uiCtrl.getDOMstrings();
+
+		document.querySelector(DOMstrings.inputSubmit).addEventListener('click', ctrlAddItem);
+
+		document.addEventListener('keypress', function(event) {
+			if (event.key === "Enter" || event.which === 13) {
+				ctrlAddItem();
+			}
+		});
+	})
 
 	var ctrlAddItem = (function() {
 
 		// 1. Get the input
 		var input = uiCtrl.getInput();
 		console.log(input);
-		
+
 	})
 
-	document.querySelector(DOMstrings.inputSubmit).addEventListener('click', ctrlAddItem);
-
-	document.addEventListener('keypress', function(event) {
-		if (event.key === "Enter" || event.which === 13) {
-			ctrlAddItem();
+	return {		
+		init: function() {
+			console.log('Application has started');
+			setupEventListeners();
 		}
-	});
-
+	};
 })(budgetController, uiController);
+
+appController.init();
