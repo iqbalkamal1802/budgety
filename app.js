@@ -3,7 +3,60 @@
 // (arg_1, arg_2);
 var budgetController = (function() {
 
+	var Expense = function(id, description, value) {
+		this.id = id;
+		this.description = description;
+		this.value = value;
+	};
 
+	var Income = function(id, description, value) {
+		this.id = id;
+		this.description = description;
+		this.value = value;
+	};
+
+	var data = {
+		allItems: {
+			exp: [],
+			inc: []
+		},
+		totals: {
+			exp: 0,
+			inc: 0
+		}
+	};
+	
+
+	return {
+		addItem: function(type, desc, val) {
+			var newItem, ID;
+
+			var itemsCount = data.allItems[type].length;
+
+			// We want to generate the correct ID.
+			// If there is no item yet, start from 1. But if there exists another items, then
+			// we need to get the latest ID (from the last element in the array) then increment it by 1
+			if (itemsCount === 0) {
+				ID = 1;
+			} else {
+				// We need to deduct itemsCount with 1 because array index starts from 0.
+				ID = data.allItems[type][itemsCount - 1].id + 1;
+			}
+
+
+			if (type === 'exp') {
+				newItem = new Expense(ID, desc, val);
+			} else if (type === 'inc') {
+				newItem = new Income(ID, desc, val);
+			}
+
+			// As type can be either 'exp' or 'inc', which matches
+			// with the json key inside the allItems, we can directly use it this way:
+			data.allItems[type].push(newItem);
+
+			return newItem;
+		}
+	};
 })();
 
 
@@ -13,7 +66,9 @@ var uiController = (function() {
 		inputType: '.add__type',
 		inputDescription: '.add__description',
 		inputValue: '.add__value',
-		inputSubmit: '.add__btn'
+		inputSubmit: '.add__btn',
+		incomeContainer: '.income__list',
+		expenseContainer: '.expenses__list'
 	};
 
 	return {
@@ -25,8 +80,27 @@ var uiController = (function() {
 				value: document.querySelector(DOMstrings.inputValue).value
 			};
 		},
+
 		getDOMstrings: function() {
 			return DOMstrings;
+		},
+
+		addItemToList: function(item, type) {
+			var html, container;
+
+			if (type === 'exp')  {
+				container = DOMstrings.expenseContainer;
+				html = '<div class="item clearfix" id="%id%"> <div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">- %value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';				
+			} else if (type === 'inc') {
+				container = DOMstrings.incomeContainer;
+				html = '<div class="item clearfix" id="%id%"><div class="item__description">%description%</div> <div class="right clearfix"> <div class="item__value">+ %value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+			}
+
+			var newHtml = html.replace('%id%', item.id);
+			var newHtml = newHtml.replace('%description%', item.description);
+			var newHtml = newHtml.replace('%value%', item.value);
+
+			document.querySelector(container).insertAdjacentHTML('beforeend', newHtml);
 		}
 	};
 })();
@@ -34,6 +108,7 @@ var uiController = (function() {
 
 var appController = (function(budgetCtrl, uiCtrl) {
 
+	// Group all event listeners in this function
 	var setupEventListeners = (function() {
 		var DOMstrings = uiCtrl.getDOMstrings();
 
@@ -46,12 +121,17 @@ var appController = (function(budgetCtrl, uiCtrl) {
 		});
 	})
 
+	// The hook that process input and adds item to the UI
 	var ctrlAddItem = (function() {
 
 		// 1. Get the input
 		var input = uiCtrl.getInput();
-		console.log(input);
 
+		// 2. Process the data
+		var newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+
+		// 3. Add the newItem in the UI to show the changes inputted
+		uiCtrl.addItemToList(newItem, input.type);
 	})
 
 	return {		
