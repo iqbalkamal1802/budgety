@@ -3,34 +3,53 @@
 // (arg_1, arg_2);
 var budgetController = (function() {
 
-	var x = 23;
 
-	var add = function(input) {
-		return x + input;
-	}
-
-	// This method should return/give the public access to these methods
-	return {
-		publicTest: function(input) {
-			return add(input);
-		}
-	}
 })();
 
 
 var uiController = (function() {
 
-});
+	var DOMstrings = {
+		inputType: '.add__type',
+		inputDescription: '.add__description',
+		inputValue: '.add__value',
+		inputSubmit: '.add__btn'
+	};
+
+	return {
+		getInput: function() {
+			// Just return JSON object
+			return {
+				type: document.querySelector(DOMstrings.inputType).value,
+				description: document.querySelector(DOMstrings.inputDescription).value,
+				value: document.querySelector(DOMstrings.inputValue).value
+			};
+		},
+		getDOMstrings: function() {
+			return DOMstrings;
+		}
+	};
+})();
 
 
 var appController = (function(budgetCtrl, uiCtrl) {
 
-	var result = budgetCtrl.publicTest(5);
+	var DOMstrings = uiCtrl.getDOMstrings();
 
-	return {
-		anotherPublicTest: function() {
-			console.log(result);
+	var ctrlAddItem = (function() {
+
+		// 1. Get the input
+		var input = uiCtrl.getInput();
+		console.log(input);
+		
+	})
+
+	document.querySelector(DOMstrings.inputSubmit).addEventListener('click', ctrlAddItem);
+
+	document.addEventListener('keypress', function(event) {
+		if (event.key === "Enter" || event.which === 13) {
+			ctrlAddItem();
 		}
-	}
+	});
 
 })(budgetController, uiController);
