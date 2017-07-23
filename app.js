@@ -101,6 +101,23 @@ var uiController = (function() {
 			var newHtml = newHtml.replace('%value%', item.value);
 
 			document.querySelector(container).insertAdjacentHTML('beforeend', newHtml);
+		},
+
+		clearFields: function() {
+			var fields, fieldsArr;
+
+			// Get all the fields object that is in the form of list, not array
+			fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+			// Turn the list into an array by using slice method from Array prototype
+			fieldsArr = Array.prototype.slice.call(fields);
+
+			// Set the value of each input to empty
+			fieldsArr.forEach(function(current, index, array) {
+				current.value = '';
+			})
+
+			// Automatically focus to the description field 
+			fieldsArr[0].focus();
 		}
 	};
 })();
@@ -132,6 +149,7 @@ var appController = (function(budgetCtrl, uiCtrl) {
 
 		// 3. Add the newItem in the UI to show the changes inputted
 		uiCtrl.addItemToList(newItem, input.type);
+		uiCtrl.clearFields();
 	})
 
 	return {		
