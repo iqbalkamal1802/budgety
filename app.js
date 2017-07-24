@@ -138,18 +138,30 @@ var appController = (function(budgetCtrl, uiCtrl) {
 		});
 	})
 
+	var updateBudget = (function() {
+		// 1. Calculate the budget
+		// 2. Return the budget
+		// 3. Update the display of the budget
+	})
+
 	// The hook that process input and adds item to the UI
 	var ctrlAddItem = (function() {
+		var input, newItem;
 
 		// 1. Get the input
-		var input = uiCtrl.getInput();
+		input = uiCtrl.getInput();
 
-		// 2. Process the data
-		var newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+		if (input.description !== "" && !isNaN(input.value) && input.value > 0) {
+			// 2. Process the data
+			newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
-		// 3. Add the newItem in the UI to show the changes inputted
-		uiCtrl.addItemToList(newItem, input.type);
-		uiCtrl.clearFields();
+			// 3. Add the newItem in the UI to show the changes inputted
+			uiCtrl.addItemToList(newItem, input.type);
+			uiCtrl.clearFields();
+
+			// 4. Update budget
+			updateBudget();
+		}
 	})
 
 	return {		
