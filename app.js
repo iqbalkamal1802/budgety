@@ -7,7 +7,18 @@ var budgetController = (function() {
 		this.id = id;
 		this.description = description;
 		this.value = value;
+		this.percentage = -1;
 	};
+
+	Expense.prototype.calcPercentage = function(totalIncome){
+		if (totalIncome > 0) {
+			this.percentage = Math.round((this.value / totalIncome) * 100);
+		}
+	}
+
+	Expense.prototype.getPercentage = function() {
+		return this.percentage;
+	}
 
 	var Income = function(id, description, value) {
 		this.id = id;
@@ -70,6 +81,7 @@ var budgetController = (function() {
 
 			return newItem;
 		},
+
 		deleteItem: function(type, id) {
 			var ids = data.allItems[type].map(function(current, index, array) {
 				return current.id;
@@ -81,6 +93,7 @@ var budgetController = (function() {
 				data.allItems[type].splice(index, 1);
 			}
 		},
+
 		calculateBudget: function() {
 			// Calc total income and expenses
 			calculateTotal('exp');
@@ -96,6 +109,23 @@ var budgetController = (function() {
 				data.percentage = -1;
 			}
 		},
+
+		calculatePercentages: function() {
+			var totalIncome = data.totals.inc;
+
+			data.allItems.exp.forEach(function(curr, index, arr) {
+				curr.calcPercentage(totalIncome);
+			});
+		},
+
+		getPercentages: function() {
+			var allPerc = data.allItems.exp.map(function(curr, i, arr) {
+				return curr.getPercentage();
+			});
+
+			return allPerc;
+		},
+
 		getBudget: function() {
 			return {
 				budget: data.budget,
@@ -104,6 +134,7 @@ var budgetController = (function() {
 				percentage: data.percentage
 			}
 		},
+
 		testing: function() {
 			console.log(data);
 		}
@@ -230,8 +261,19 @@ var appController = (function(budgetCtrl, uiCtrl) {
 		uiCtrl.displayBudget(budget);
 	})
 
+	var updatePercentages = function() {
+		// Calculate the percentages of each item
+		budgetCtrl.calculatePercentages();
+
+		// Retrieve the percentages as an array
+		var percentages = budgetCtrl.getPercentages();
+
+		// Update the UI to match the latest data of percentages
+		console.log(percentages);
+	}
+
 	// The hook that process input and adds item to the UI
-	var ctrlAddItem = (function() {
+	var ctrlAddItem = function() {
 		var input, newItem;
 
 		// 1. Get the input
@@ -247,8 +289,11 @@ var appController = (function(budgetCtrl, uiCtrl) {
 
 			// 4. Update budget
 			updateBudget();
+
+			// Update each of the expense items percentage
+			updatePercentages();			
 		}
-	})
+	}
 
 	var ctrlDeleteItem = function(event) {
 		var targetContainerID, splitContainerID, type, ID;
@@ -270,6 +315,9 @@ var appController = (function(budgetCtrl, uiCtrl) {
 
 			// Update the budget
 			updateBudget();
+
+			// Update each of the expense items percentage
+			updatePercentages();
 		}
 	}
 
