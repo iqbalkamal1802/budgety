@@ -191,6 +191,14 @@ var uiController = (function() {
 		return (itemType === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
 	};
 
+	// A custom method to be able iterate nodeList like an array
+	var nodeListForEach = function(list, callbackFunction) {
+		for (var i = 0; i < list.length; i++) {
+			callbackFunction(list[i], i);
+		}
+	};
+
+
 	// Public methods of uiController object
 	return {
 		getInput: function() {
@@ -215,6 +223,23 @@ var uiController = (function() {
 
 		getDOMstrings: function() {
 			return DOMstrings;
+		},
+
+		// This public methods change the highlighting of the fields and the color of the button when the type (income, expense) is changed
+		changeItemType: function() {
+			var fields;
+
+			fields = document.querySelectorAll(
+				DOMstrings.inputType + ',' + 
+				DOMstrings.inputDescription + ',' + 
+				DOMstrings.inputValue
+			);
+
+			nodeListForEach(fields, function(current) {
+				current.classList.toggle('red-focus');
+			});
+
+			document.querySelector(DOMstrings.inputSubmit).classList.toggle('red');
 		},
 
 		addItemToList: function(item, type) {
@@ -261,13 +286,6 @@ var uiController = (function() {
 		displayPercentages: function(percentages) {
 
 			var fields = document.querySelectorAll(DOMstrings.expensePercLabel);
-
-			// A custom method to be able iterate nodeList like an array
-			var nodeListForEach = function(list, callbackFunction) {
-				for (var i = 0; i < list.length; i++) {
-					callbackFunction(list[i], i);
-				}
-			};
 
 			nodeListForEach(fields, function(current, index) {
 				// We now loop the node lists containing all the element with the class of .item__percentage
@@ -318,6 +336,9 @@ var appController = (function(budgetCtrl, uiCtrl) {
 
 		// This waits for user clicking on delete button to remove item
 		document.querySelector(DOMstrings.parentContainer).addEventListener('click', ctrlDeleteItem);
+
+		// This waits for user changes the item type for the input, income to expense and vice versa
+		document.querySelector(DOMstrings.inputType).addEventListener('change', uiCtrl.changeItemType);
 	})
 
 	var updateBudget = (function() {
