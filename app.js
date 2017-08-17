@@ -154,6 +154,7 @@ var uiController = (function() {
 		incomeContainer: '.income__list',
 		expenseContainer: '.expenses__list',
 		expensePercLabel: '.item__percentage',
+		budgetDateLabel: '.budget__title--month',
 		budgetLabel: '.budget__value',
 		incomeLabel: '.budget__income--value',
 		expensesLabel: '.budget__expenses--value',
@@ -199,6 +200,17 @@ var uiController = (function() {
 				description: document.querySelector(DOMstrings.inputDescription).value,
 				value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
 			};
+		},
+
+		displayCurrentDate: function() {
+			var now, year, month, monthIndex, monthList;
+
+			now = new Date(); // get the date of today
+			year = now.getFullYear();
+			monthIndex = now.getMonth();
+			monthList = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+			document.querySelector(DOMstrings.budgetDateLabel).textContent = monthList[monthIndex]+ ' ' + year;
 		},
 
 		getDOMstrings: function() {
@@ -382,6 +394,7 @@ var appController = (function(budgetCtrl, uiCtrl) {
 	return {		
 		init: function() {
 			console.log('Application has started');
+			uiCtrl.displayCurrentDate();
 			uiCtrl.displayBudget({
 				budget: 0,
 				totalInc: 0,
