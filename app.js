@@ -152,6 +152,7 @@ var uiController = (function() {
 		parentContainer: '.container',
 		incomeContainer: '.income__list',
 		expenseContainer: '.expenses__list',
+		expensePercLabel: '.item__percentage',
 		budgetLabel: '.budget__value',
 		incomeLabel: '.budget__income--value',
 		expensesLabel: '.budget__expenses--value',
@@ -213,6 +214,28 @@ var uiController = (function() {
 			fieldsArr[0].focus();
 		},
 
+		displayPercentages: function(percentages) {
+
+			var fields = document.querySelectorAll(DOMstrings.expensePercLabel);
+
+			// A custom method to be able iterate nodeList like an array
+			var nodeListForEach = function(list, callbackFunction) {
+				for (var i = 0; i < list.length; i++) {
+					callbackFunction(list[i], i);
+				}
+			};
+
+			nodeListForEach(fields, function(current, index) {
+				// We now loop the node lists containing all the element with the class of .item__percentage
+				// and assign content to each of them
+				if (percentages[index] > 0) {
+					current.textContent = percentages[index] + '%';
+				} else {
+					current.textContent = '---';
+				}
+			});
+		},
+
 		// This public method is for displaying the totals on the UI side, should be triggered during 
 		// starting up and after making input
 		displayBudget: function(budgetObject) {
@@ -269,7 +292,7 @@ var appController = (function(budgetCtrl, uiCtrl) {
 		var percentages = budgetCtrl.getPercentages();
 
 		// Update the UI to match the latest data of percentages
-		console.log(percentages);
+		uiCtrl.displayPercentages(percentages);
 	}
 
 	// The hook that process input and adds item to the UI
