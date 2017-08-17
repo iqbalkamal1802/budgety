@@ -52,6 +52,7 @@ var budgetController = (function() {
 		data.totals[type] = sum;
 	}
 
+	// Public methods of budgetController object
 	return {
 		addItem: function(type, desc, val) {
 			var newItem, ID;
@@ -159,6 +160,37 @@ var uiController = (function() {
 		percentageLabel: '.budget__expenses--percentage'
 	};
 
+	var	formatNumber = function(num, itemType) {
+		// In this function what we want to do is to add decimal point
+		// to the value of item, adding comma per thousands, and add plus or minus sign.
+		var numSplit, int, dec, type;
+
+		// Coerce the number to be absolute, no negative number
+		num = Math.abs(num);
+
+		// Also force to have at least 2 decimal numbers
+		num = num.toFixed(2);
+
+		// Split the number strings by the decimal point
+		numSplit = num.split('.');
+
+		// The integer must come from the first part of the split number
+		int = numSplit[0];
+
+		digits = int.length 
+		// Now we want to insert comma to the integer part for each thousand points
+		if (digits > 3) {
+			// 23510 => 23,510 , 1500000 => 1,500,000
+			int = int.substr(0, (digits - 3)) + ',' + int.substr((digits - 3), 3);
+		}
+
+		// get the decimal part of the number after split
+		dec = numSplit[1];
+
+		return (itemType === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+	};
+
+	// Public methods of uiController object
 	return {
 		getInput: function() {
 			// Just return JSON object
@@ -178,15 +210,15 @@ var uiController = (function() {
 
 			if (type === 'exp')  {
 				container = DOMstrings.expenseContainer;
-				html = '<div class="item clearfix" id="exp-%id%"> <div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">- %value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';				
+				html = '<div class="item clearfix" id="exp-%id%"> <div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value"> %value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';				
 			} else if (type === 'inc') {
 				container = DOMstrings.incomeContainer;
-				html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div> <div class="right clearfix"> <div class="item__value">+ %value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+				html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div> <div class="right clearfix"> <div class="item__value"> %value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
 			}
 
 			var newHtml = html.replace('%id%', item.id);
 			var newHtml = newHtml.replace('%description%', item.description);
-			var newHtml = newHtml.replace('%value%', item.value);
+			var newHtml = newHtml.replace('%value%', formatNumber(item.value, type));
 
 			document.querySelector(container).insertAdjacentHTML('beforeend', newHtml);
 		},
@@ -239,9 +271,12 @@ var uiController = (function() {
 		// This public method is for displaying the totals on the UI side, should be triggered during 
 		// starting up and after making input
 		displayBudget: function(budgetObject) {
-			document.querySelector(DOMstrings.budgetLabel).textContent = budgetObject.budget;
-			document.querySelector(DOMstrings.incomeLabel).textContent = budgetObject.totalInc;
-			document.querySelector(DOMstrings.expensesLabel).textContent = budgetObject.totalExp;
+			var budgetState;
+			budgetObject.budget > 0 ? budgetState = 'inc' : budgetState = 'exp';
+
+			document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(budgetObject.budget, budgetState);
+			document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(budgetObject.totalInc, 'inc');
+			document.querySelector(DOMstrings.expensesLabel).textContent = formatNumber(budgetObject.totalExp, 'exp');
 
 			if (budgetObject.percentage > 0) {
 				document.querySelector(DOMstrings.percentageLabel).textContent = budgetObject.percentage + "%";
